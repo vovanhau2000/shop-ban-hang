@@ -32,7 +32,7 @@ class PageController extends Controller
     }
 
     public function getChitiet(Request $req){
-        //lấy sản phẩm theo id nên tạp biến sanpham, mỗi sản phẩm chỉ có 1 id nên trỏ đén phương thức first 
+        //lấy sản phẩm theo id nên tạp biến sanpham, mỗi sản phẩm chỉ có 1 id nên trỏ đén phương thức first
         $sanpham = Product::where('id',$req->id)->first(); //truyền biến sanpham qua view
         $sp_tuongtu = Product::where('id_type', $sanpham->id_type)->paginate(6);
         return view('page.chitiet_sanpham', compact('sanpham', 'sp_tuongtu'));
@@ -49,8 +49,8 @@ class PageController extends Controller
     public function getAddtoCart(Request $req,$id){
 
        $product = Product::find($id); //tạo để kiểm tra xem có SP đó hay không, SP tương ứng với id
-       $oldCart = Session('cart')?Session::get('cart'):null; //tạo dể kiểm tra xem hiện tại trong session mình có sesion cart hay chưa, nếu chưa thì null, nếu có thì lấy seeion cart đó để gán cho biến oldCart  
-       $cart = new Cart($oldCart); 
+       $oldCart = Session('cart')?Session::get('cart'):null; //tạo dể kiểm tra xem hiện tại trong session mình có sesion cart hay chưa, nếu chưa thì null, nếu có thì lấy seeion cart đó để gán cho biến oldCart
+       $cart = new Cart($oldCart);
        $cart->add($product, $id); //để thêm một phần tử vào giỏ hàng, mình dùng phương thức add
        $req->session()->put('cart',$cart);
        return redirect()->back();//sau khi thêm vào thành công thì trở về trang chủ
@@ -68,13 +68,13 @@ class PageController extends Controller
             Session::forget('cart');
         }
 
-        
+
         return redirect()->back();
     }
 
     //truyền vào cái id sản phẩm mà mình muốn xoá
     // tạo biến oldCart để kiểm tra xem trong giỏ hàng hiện tại có giỏ hàng hay không, nếu có thì dùng session get giỏ hàng đó về, nếu không có thì null
-    // tạo biến cart, truyền vào biến oldCart 
+    // tạo biến cart, truyền vào biến oldCart
     //tạo biến cart để trỏ đến phương thức xoá
     //tạo session để put lại giỏ hàng lại thành giở hàng mới
     // return để quay về trang chủ
@@ -86,9 +86,13 @@ class PageController extends Controller
 
     public function postCheckout(Request $req){
         $cart = Session::get('cart');
-        
-        
 
+        $paymentMethodPrice = $req->orders_payment_method_price;
+        $totalPrice = $req->orders_total_price;
+
+        //đây là giá phí ship hàng và tổng tiền, đã handle, backend dùng 2 cột này để lưu vào orders
+        //anh support cho e tới đay thôi, còn lưu e tự code thêm
+dd($totalPrice, $paymentMethodPrice);
 
         $customer = new Customer;
         $customer->name = $req->name;  //$req->name, gender,email là những giá trị của thuộc tính có tên là "name" trong form của trang dat_hang
@@ -96,7 +100,7 @@ class PageController extends Controller
         $customer->email = $req->email;
         $customer->address = $req->address;
         $customer->phone_number = $req->phone;
-        $customer->note = $req->notes; 
+        $customer->note = $req->notes;
         $customer->save();
 
         $bill = new Bill;
@@ -116,13 +120,13 @@ class PageController extends Controller
             $bill_detail->final_price = ($value['final_price']/$value['qty']);
             $bill_detail->save();
 
-          
+
 
         }
         Session::forget('cart');
         return redirect()->back()->with('thongbao', 'Đặt hàng thành công');
-        
-  
+
+
 
 
 
@@ -133,7 +137,7 @@ class PageController extends Controller
         $product = Product::where('name', 'like', '%'.$req->key.'%')
                             ->orWhere('unit_price',$req->key)
                             ->get();
-        return view('page.search',compact('product'));                    
+        return view('page.search',compact('product'));
       }
 
 
